@@ -1,0 +1,22 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: n8n-ingress
+  namespace: n8n
+  annotations:
+    spec.ingressClassName: "gce"
+    kubernetes.io/ingress.global-static-ip-name: app-datalinks-io-ip
+    networking.gke.io/managed-certificates: managed-cert
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  rules:
+  - host: app.datalinks.io
+    http:
+      paths:
+      - pathType: ImplementationSpecific
+        backend:
+          service:
+            name: n8n
+            port:
+              name: n8nport
+

@@ -50,21 +50,55 @@ spec:
                   name: postgres-secret
                   key: POSTGRES_NON_ROOT_PASSWORD
             - name: N8N_PROTOCOL
-              value: http
+                secretKeyRef:
+                  name: n8n-secret
+                  key: N8N_PROTOCOL
             - name: N8N_PORT
-              value: "5678"
+                secretKeyRef:
+                  name: n8n-secret
+                  key: N8N_PORT
+            - name: N8N_HOST
+                secretKeyRef:
+                  name: n8n-secret
+                  key: N8N_HOST
+            - name: N8N_EDITOR_BASE_URL
+                secretKeyRef:
+                  name: n8n-secret
+                  key: N8N_EDITOR_BASE_URL
+            - name: N8N_ENDPOINT_WEBHOOK
+                secretKeyRef:
+                  name: n8n-secret
+                  key: N8N_ENDPOINT_WEBHOOK
           image: n8nio/n8n
           name: n8n
           ports:
             - containerPort: 5678
           resources:
             requests:
-              memory: "250Mi"
-            limits:
               memory: "500Mi"
+            limits:
+              memory: "1000Mi"
           volumeMounts:
             - mountPath: /home/node/.n8n
               name: n8n-claim0
+          livenessProbe:  # This part should be within the container specification
+            httpGet:
+              path: /healthz # Replace with your actual health check endpoint if different
+              port: 5678
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 15
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:  # This part should be within the container specification
+            httpGet:
+              path: /healthz  # Replace with your actual health check endpoint if different
+              port: 5678
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 15
+            successThreshold: 1
+            failureThreshold: 3
       restartPolicy: Always
       volumes:
         - name: n8n-claim0
